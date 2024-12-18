@@ -10,8 +10,8 @@ import (
 const (
 	width       = 70  // Terminal width
 	height      = 20  // Terminal height
-	snowflakes  = "❄" // Symbols for snowflakes
-	clearScreen = "\033[H\033[J" // ANSI escape code to clear terminal screen
+	snowflakes  = "*" // Symbols for snowflakes
+	clearScreen = "\033[H\033[J" // ANSI escape code to clear the terminal
 )
 
 // Snowflake structure to track position
@@ -45,8 +45,8 @@ func updateSnowflakes(snow []Snowflake) {
 	}
 }
 
-// Function to render the snowflakes and birthday message
-func renderFrame(snow []Snowflake, message string) {
+// Function to render the snowflakes and moving message
+func renderFrame(snow []Snowflake, message string, offset int) {
 	fmt.Print(clearScreen) // Clear the screen
 
 	// Create a 2D grid for rendering
@@ -65,12 +65,12 @@ func renderFrame(snow []Snowflake, message string) {
 		}
 	}
 
-	// Place the birthday message in the center
-	centerX := (width - len(message)) / 2
-	centerY := height / 2
+	// Place the horizontally moving birthday message
+	startX := offset % (width + len(message))
 	for i, char := range message {
-		if centerX+i < width {
-			grid[centerY][centerX+i] = char
+		pos := (startX + i) % width // Wrap the message horizontally
+		if pos >= 0 && pos < width {
+			grid[height/2][pos] = char
 		}
 	}
 
@@ -92,19 +92,19 @@ func main() {
 		name = os.Args[1]
 	}
 
-	message := fmt.Sprintf("🎉 Happy Birthday %s! 🎉", name)
+	message := fmt.Sprintf(" 🎉 Happy Birthday %s! 🎉 ", name) // Message with padding
 
-	// Initialize snowflakes
-	snow := initSnowflakes(50) // 50 snowflakes
+	snow := initSnowflakes(40)
 
-	// Run animation loop
-	for i := 0; i < 100; i++ { // 100 animation frames
-		renderFrame(snow, message) // Render the frame
-		updateSnowflakes(snow)     // Update snowflake positions
-		time.Sleep(100 * time.Millisecond)
+	offset := 0
+	for i := 0; i < 120; i++ { // 300 animation frames
+		renderFrame(snow, message, offset)
+		updateSnowflakes(snow)
+		offset++ // Move the message horizontally
+		time.Sleep(90 * time.Millisecond)
 	}
 
-	// Final message
-	fmt.Println("\n🎊 Enjoy your snowy special day! 🎊")
+	fmt.Println("\n")
+	fmt.Println("🎊 Enjoy your special day! 🎊")
 }
 
